@@ -2,16 +2,15 @@
 
 export MIX_ENV=prod
 export PORT=4999
+export NODEBIN=`pwd`/assets/node_modules/.bin
+export PATH="$PATH:$NODEBIN"
 
 echo "Beginning deploy of Teetime Bot..."
 
-mix deps.get --only prod
+mix deps.get
 mix compile
 
-mix ecto.reset
-
-(cd assets && npm install --prefix)
-(cd assets && npm run deploy --prefix)
+(cd assets && npm install && webpack --node production)
 mix phx.digest
 mix release
 

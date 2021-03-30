@@ -50,29 +50,29 @@ class TeeTime(object):
         session.get("https://www.abenaquicc.com/club/scripts/login/login.asp")
 
         # login
-        #print("LOGGING IN USER " + self.username + " ...")
+        print("LOGGING IN USER " + self.username + " ...")
         loginresponse = session.post("https://www.abenaquicc.com/club/scripts/login/Login_Validate.asp?GRP=36600&NS=PUBLIC", data={'user': self.username, 'pw': self.password, 'MemEnter': ''})
 
         # get tee sheet
-        #print("GETTING THE TEE SHEET FOR " + self.get_date() + "...")
+        print("GETTING THE TEE SHEET FOR " + self.get_date() + "...")
         teesheetresponse = session.get("http://abenaquicc.mfteetimes.com/sso/?u=01457D&p=b3a4e9474edc367129b1eaf6d8bd9b4f25eecef6&date=" + self.get_date() + "&time=&t=MEMBERNUM&course=1")
 
-        # # wait for tee sheet to become open
-        # if self.is_tee_sheet_closed():
-        #     print("WAITING FOR THE TEE SHEET TO OPEN...")
-        #     while True:
-        #         getServerTime = session.get("http://abenaquicc.mfteetimes.com/igolf/includes_admin/ajax/misc/getServerTime")
-        #         serverTime = getServerTime.headers['Date'][-12:-4]
-        #         print(serverTime)
-        #         if serverTime == "00:00:01" or serverTime == "00:00:02" or serverTime == "01:00:01" or serverTime == "01:00:02" or serverTime == "20:00:01" or serverTime == "20:00:02":
-        #             break
-        #         print("TEE SHEET CLOSED")
-        #         time.sleep(1)
+        # wait for tee sheet to become open
+        if self.is_tee_sheet_closed():
+            print("WAITING FOR THE TEE SHEET TO OPEN...")
+            while True:
+                getServerTime = session.get("http://abenaquicc.mfteetimes.com/igolf/includes_admin/ajax/misc/getServerTime")
+                serverTime = getServerTime.headers['Date'][-12:-4]
+                print(serverTime)
+                if serverTime == "00:00:01" or serverTime == "00:00:02" or serverTime == "01:00:01" or serverTime == "01:00:02" or serverTime == "20:00:01" or serverTime == "20:00:02":
+                    break
+                print("TEE SHEET CLOSED")
+                time.sleep(1)
 
-        #print("TEE SHEET IS OPEN")
+        print("TEE SHEET IS OPEN")
 
         # request the time
-        #print("REQUESTING TEE TIME OF " + self.tee_time + " on " + self.get_date() + "...")
+        print("REQUESTING TEE TIME OF " + self.tee_time + " on " + self.get_date() + "...")
         requestData = {'cmd': 'teesheet2017',
                        'action': 'teetime_interface_holes_to_play',
                        'slotsAvailable': '4',

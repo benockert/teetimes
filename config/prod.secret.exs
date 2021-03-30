@@ -23,7 +23,7 @@ config :teetimes, TeetimesWeb.Endpoint,
 # If you are doing OTP releases, you need to instruct Phoenix
 # to start each relevant endpoint:
 #
-#     config :teetimes, TeetimesWeb.Endpoint, server: true
+     config :teetimes, TeetimesWeb.Endpoint, server: true
 #
 # Then you can assemble a release by calling `mix release`.
 # See `mix help release` for more information.

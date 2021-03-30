@@ -15,7 +15,7 @@ defmodule Teetimes.PythonServer do
   end
 
   def call_function(module, function, args) do
-    GenServer.call(__MODULE__, {:call_function, module, function, args})
+    GenServer.call(__MODULE__, {:call_function, module, function, args}, :infinity)
   end
 
 
