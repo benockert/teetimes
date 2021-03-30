@@ -31,7 +31,7 @@ class TeeTime(object):
 
         print(five_days_from_now)
 
-        requested_date_current_time = datetime(self.year, self.month, self.day, right_now.hour, right_now.minute, right_now.second)
+        requested_date_current_time = datetime(int(self.year), int(self.month), int(self.day), int(right_now.hour), int(right_now.minute), int(right_now.second))
         when_tee_sheet_opens = datetime(five_days_from_now.year, five_days_from_now.month, five_days_from_now.day, 20, 00, 00)
 
         print("request date current time = ", requested_date_current_time)
