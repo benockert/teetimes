@@ -1,7 +1,8 @@
 //Add styling and phoenix stuff
-import "../css/app.scss"
+import "../css/app.scss";
 import "react-datetime/css/react-datetime.css";
-import "phoenix_html"
+import "phoenix_html";
+import $ from 'jquery';
 
 //Add React component
 import React, { useState, useEffect } from 'react';
@@ -19,7 +20,10 @@ function App() {
 
   const [resp, setResponse] = useState("Awaiting response...");
 
-  function reserve(u, p, d, t) {
+  function reserve(u, p) {
+    let d = $('#date').val();
+    let t = $('#time').val();
+    console.log(u, p, d, t);
     let channel = get_channel();
     channel.push("reserve", {username: u, password: p, date: d, time: t})
            .receive("ok", (response) => setResponse(response.response));
@@ -27,6 +31,8 @@ function App() {
 
   return (
     <div>
+      <h1>Tee Time Bot</h1>
+
       <div>
         <p>Enter username:</p>
         <input
@@ -44,20 +50,21 @@ function App() {
         <br/>
         <p>Enter target date:</p>
         <DateTime
+          inputProps={{ id:'date' }}
           dateFormat='MM-DD-YYYY'
           timeFormat={false}
+          closeOnSelect={true}
         />
         <br/>
         <p>Enter target time:</p>
         <DateTime
+          inputProps={{ id:'time' }}
           dateFormat={false}
           timeFormat='HH:mm:00'
         />
         <br/>
         <button className="button" onClick={() => reserve(username,
-                                                          password,
-                                                          date,
-                                                          time)}>
+                                                          password)}>
         Reserve
         </button>
         <br/>
@@ -84,6 +91,13 @@ function TeeTimes() {
     </div>
   );
 }
+
+$(document).ready(function() {
+  setTimeout(function() {
+    alert("Hey Dad, here's what I was able to do since yesterday. I hope this works for you and helps you throughout the season! I'll try and make improvements to when I have time, but for now, here it is. Luvs!");
+  }, 0);
+});
+
 
 
 ReactDOM.render(
