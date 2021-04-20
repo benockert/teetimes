@@ -24,16 +24,15 @@ class TeeTime(object):
         self.day = date[3:5]
         self.year = date[6:10]
         self.tee_time = tee_time
-        self.five_days_from_now = (right_now + timedelta(days=5))
 
     def is_tee_sheet_closed(self):
         right_now = datetime.now()
+        five_days_from_now = (right_now + timedelta(days=5))
 
-
-        print(self.five_days_from_now)
+        print(five_days_from_now)
 
         requested_date_current_time = datetime(int(self.year), int(self.month), int(self.day), int(right_now.hour), int(right_now.minute), int(right_now.second))
-        when_tee_sheet_opens = datetime(self.five_days_from_now.year, self.five_days_from_now.month, self.five_days_from_now.day, 20, 00, 00)
+        when_tee_sheet_opens = datetime(five_days_from_now.year, five_days_from_now.month, five_days_from_now.day, 20, 00, 00)
 
         print("request date current time = ", requested_date_current_time)
         print("tee sheet opens = ", when_tee_sheet_opens)
@@ -88,7 +87,7 @@ class TeeTime(object):
                        'block_id': '0',
                        'blockSpecialStartAltText': '',
                        'extraTimesVal': ''}
-        requesttime = session.post("http://abenaquicc.mfteetimes.com/teetimes.php?cmd=teesheet2017&action=display2017&jDate=2020-10-03&course=1", data=requestData)
+        #requesttime = session.post("http://abenaquicc.mfteetimes.com/teetimes.php?cmd=teesheet2017&action=display2017&jDate=2020-10-03&course=1", data=requestData)
 
         # continue through booking
         continueData = {'time': self.tee_time,
@@ -108,8 +107,8 @@ class TeeTime(object):
                         'booked_ids': '[@booked_ids]',
                         'course': '1',
                         'block_id': '0'}
-        continuetosubmit = session.post("http://abenaquicc.mfteetimes.com/teetimes.php", data=continueData)
-        return continuetosubmit.status_code
+        #continuetosubmit = session.post("http://abenaquicc.mfteetimes.com/teetimes.php", data=continueData)
+        #return continuetosubmit.status_code
 
         # submit booking
         formData = {'dateof:': self.get_date(),
