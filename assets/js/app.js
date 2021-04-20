@@ -32,7 +32,7 @@ function App() {
 
     let channel = get_channel();
     channel.push("reserve", {username: u, password: p, date: d, time: t})
-           .receive("ok", (response) => setResponse(response.response));
+           .receive("ok", (response) => console.log("Received from server:", response));
   }
 
   return (
