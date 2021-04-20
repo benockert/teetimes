@@ -18,12 +18,18 @@ function App() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
 
-  const [resp, setResponse] = useState("Awaiting response...");
+  const [msg, setMsg] = useState("");
 
   function reserve(u, p) {
     let d = $('#date').val();
     let t = $('#time').val();
-    console.log(u, p, d, t);
+    console.log("Making reservation", u, p, d, t);
+    let send = "Reserving tee time for user ";
+    send += username;
+    send += " on " + d;
+    send += " at " + t + ".";
+    setMsg(send);
+
     let channel = get_channel();
     channel.push("reserve", {username: u, password: p, date: d, time: t})
            .receive("ok", (response) => setResponse(response.response));
@@ -31,49 +37,41 @@ function App() {
 
   return (
     <div>
-      <h1>Tee Time Bot</h1>
-
-      <div>
-        <p>Enter username:</p>
-        <input
-        type="text"
-        value={username}
-        onChange={(u) => setUsername(u.target.value)}
-        />
-        <br/>
-        <p>Enter password:</p>
-        <input
-        type="password"
-        value={password}
-        onChange={(p) => setPassword(p.target.value)}
-        />
-        <br/>
-        <p>Enter target date:</p>
-        <DateTime
-          inputProps={{ id:'date' }}
-          dateFormat='MM-DD-YYYY'
-          timeFormat={false}
-          closeOnSelect={true}
-        />
-        <br/>
-        <p>Enter target time:</p>
-        <DateTime
-          inputProps={{ id:'time' }}
-          dateFormat={false}
-          timeFormat='HH:mm:00'
-        />
-        <br/>
-        <button className="button" onClick={() => reserve(username,
-                                                          password)}>
-        Reserve
-        </button>
-        <br/>
-        <br/>
-        <h3>Response:</h3>
-        <p>If the response is <i>200</i>, the tee time has been
-        successfully blocked, so manually login and you will be able
-        to book your time right at 8:05.</p>
-        <p>Server response: <b>{ resp }</b></p>
+      {msg !== "" &&
+        <div className="alert">
+          <span className="closebtn" onClick={() => setMsg("")}>&times;</span>
+          {msg}
+        </div>
+      }
+      <div id="form">
+        <h2 className="title">Tee Time Bot</h2>
+        <div>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(u) => setUsername(u.target.value)}
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(p) => setPassword(p.target.value)}
+          />
+          <DateTime
+            inputProps={{ id:'date' }}
+            dateFormat='MM-DD-YYYY'
+            timeFormat={false}
+            closeOnSelect={true}
+          />
+          <DateTime
+            inputProps={{ id:'time' }}
+            dateFormat={false}
+            timeFormat='HH:mm:00'
+          />
+          <button className="button" onClick={() => reserve(username, password)}>
+            Reserve
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -86,23 +84,51 @@ function TeeTimes() {
   let body = <App />
 
   return (
-    <div className="container">
-      {body}
+    <div>
+      <img className="logo" src='/images/logo.svg' alt="Alt" />
+      <div className="tee-form">
+        {body}
+      </div>
     </div>
   );
 }
 
+//sets input field placeholder values
 $(document).ready(function() {
-  setTimeout(function() {
-    alert("Hey Dad, here's what I was able to do since yesterday. I hope this works for you and helps you throughout the season! I'll try and make improvements to when I have time, but for now, here it is. Luvs!");
-  }, 0);
+  $('#form').find("input[id=username], textarea").each(function(ev) {
+    if(!$(this).val()) {
+      $(this).attr("placeholder", "Enter your ACC username");
+    }
+  });
 });
 
+$(document).ready(function() {
+  $('#form').find("input[type=password], textarea").each(function(ev) {
+    if(!$(this).val()) {
+      $(this).attr("placeholder", "Enter your ACC password");
+    }
+  });
+});
 
+$(document).ready(function() {
+  $('#form').find("input[id=date], textarea").each(function(ev) {
+    if(!$(this).val()) {
+      $(this).attr("placeholder", "Select your target date (MM-DD-YYYY)");
+    }
+  });
+});
+
+$(document).ready(function() {
+  $('#form').find("input[id=time], textarea").each(function(ev) {
+    if(!$(this).val()) {
+      $(this).attr("placeholder", "Select your target time (HH:mm:00)");
+    }
+  });
+});
 
 ReactDOM.render(
   <React.StrictMode>
-  <TeeTimes />
+    <TeeTimes />
   </React.StrictMode>,
   document.getElementById('root')
 );

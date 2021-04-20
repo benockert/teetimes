@@ -26,6 +26,12 @@ defmodule TeetimesWeb.Endpoint do
     gzip: false,
     only: ~w(css fonts images js favicon.ico robots.txt)
 
+  plug Plug.Static,
+    at: "/",
+    from: :teetimes,
+    gzip: true,
+    only: ~w(images asset-manifest.json manifest.json)
+
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do

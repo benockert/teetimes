@@ -1,13 +1,123 @@
 /* This file is for your main application css. */
 @import "./phoenix.css";
 
+//form input width
+.tee-form {
+  width: 25%;
+}
+
+//Indian logo
+.logo {
+  position: fixed;
+  top: 3%;
+  left: 2%;
+  width: 80px;
+  height: 120px;
+}
+
+//website title
+.title {
+  color: white;
+}
+
+//form component position in bottom left
+#form {
+  position: fixed;
+  bottom: 1%;
+  left: 1%;
+}
+
+//default button color and shadow border
+.button {
+  background-color: #e6a44f;
+  outline: none !important;
+  border-color: #e6a44f;
+}
+
+//color and shadow for button when hovering
+.button:hover {
+  background-color: #e6a44f;
+  outline: none !important;
+  border-color: #e6a44f;
+  box-shadow: 0 0 15px #e6a44f;
+}
+
+//input box border and fill
+input[type="text"], input[type="password"], textarea {
+  background-color: white;
+  border-color: #282f1f;
+}
+
+//input area shadow
+input:focus {
+  outline: none !important;
+  border-color: #e6a44f;
+  box-shadow: 0 0 15px #e6a44f;
+}
+
+//input area shadow
+textarea:focus {
+  outline: none !important;
+  border-color: #e6a44f;
+  box-shadow: 0 0 15px #e6a44f;
+}
+
+//background image
+.container {
+  background-image: url('/images/abenaqui.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  min-height: 100%;
+  height: 100vh;
+  min-width: 100%;
+  width: 100vw;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+//moves the popup datepicker component above the input bar
+.rdtPicker {
+  position: relative;
+  bottom: 60px;
+}
+
 /* Alerts and form errors */
 .alert {
+  position: fixed;
   padding: 15px;
   margin-bottom: 20px;
+  margin-top: 10px;
+  margin-left: 25%;
+  width: 50%;
   border: 1px solid transparent;
   border-radius: 4px;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
 }
+
+.closebtn {
+  margin-left: 15px;
+  color: #155724;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.closebtn:hover {
+  color: white;
+}
+
+//other alerts
 .alert-info {
   color: #31708f;
   background-color: #d9edf7;
