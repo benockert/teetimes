@@ -159,41 +159,75 @@ class TeeTime(object):
             print("Error requesting tee time, another member may already be requesting that time")
             return "Error requesting tee time, another member may already be requesting that time"
 
-        # submit booking
-        formData = {'dateof:': self.date,
-                    'timeof': self.tee_time,
-                    'timeofOriginal': self.tee_time,
-                    'year': str(self.year),
-                    'month': str(self.month),
-                    'day': str(self.day),
-                    'course': '1',
-                    'hole': '1',
-                    'blockId': '0',
-                    'specialRequests': '',
-                    'players[0][id]': 'U1432',
-                    'players[0][trueId]': '1432',
-                    'players[0][playerType]': 'user',
-                    'players[0][bookedBy]': 'U1432',
-                    'players[0][name]': 'Ockert, Benjamin',
-                    'players[0][gender]': 'm',
-                    'players[0][cart_pref]': '0',
-                    'players[0][birthday]': '2000-07-10',
-                    'players[0][email]': 'benpiano710@gmail.com',
-                    'players[0][group]': 'FAMGF.DEP',
-                    'players[0][groupId]': '29',
-                    'players[0][isBuddy]': '0',
-                    'players[0][phone]': '',
-                    'players[0][imageUrl]': '',
-                    'players[0][isRestricted]': '0',
-                    'players[0][restrictedByGender]': '0',
-                    'players[0][restrictedByAge]': '0',
-                    'players[0][hasRequiredLeague]': '1',
-                    'players[0][memberType]': 'member',
-                    'players[0][holesToPlay]': '18/9',
-                    'recaptcha': ''}
-        # submitTeeTime = session.post("http://abenaquicc.mfteetimes.com/igolf/includes_front/teesheet2017/bookingInterface/api/Services/Reservation/TeeTime", data=formData)
-        # print("............................................")
-        # print("SERVER RESPONSE: " + submitTeeTime.status_code)
+        # print("\n\n\n\n\nSUBMITTING BOOKING")
+        # # submit booking
+        # # formHeaders = {"accept": "*/*",
+        # #                "Accept-Encoding": "gzip, deflate, br",
+        # #                "Accept-Language": "en-US,en;q=0.5",
+        # #                "Connection": "keep-alive",
+        # #                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        # #                "Host": "abenaquicc.mfteetimes.com",
+        # #                "Origin": "https://abenaquicc.mfteetimes.com",
+        # #                "Referer": "https://abenaquicc.mfteetimes.com/teetimes.php",
+        # #                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0",
+        # #                "X-Requested-With": "XMLHttpRequest"
+        # # }
+        #
+        # #removed content length
+        # formHeaders = {"accept": "*/*",
+        #                "accept-encoding": "gzip, deflate, br",
+        #                "accept-language": "en-US,en;q=0.9",
+        #                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        #                "cookie": "__cfduid=d28e070d7c083966e44d5eb020358f7771619206651; PHPSESSID=14c79c3119fdb9da70c9299a0f2dfab3; _ga=GA1.2.1404092740.1619208706; _gid=GA1.2.1408328964.1619208706; _gat=1",
+        #                "origin": "https://abenaquicc.mfteetimes.com",
+        #                "referer": "https://abenaquicc.mfteetimes.com/teetimes.php",
+        #                "sec-ch-ua": "\"Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99\"",
+        #                "sec-ch-ua-mobile": "?0",
+        #                "sec-fetch-dest": "empty",
+        #                "sec-fetch-mode": "cors",
+        #                "sec-fetch-site": "same-origin",
+        #                "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+        #                "x-requested-with": "XMLHttpRequest"
+        # }
+        # formData = {'dateof:': self.date,
+        #             'timeof': self.tee_time,
+        #             'timeofOriginal': self.tee_time,
+        #             'year': str(self.year),
+        #             'month': str(self.month),
+        #             'day': str(self.day),
+        #             'course': '1',
+        #             'hole': '1',
+        #             'blockId': '0',
+        #             'specialRequests': '',
+        #             'players[0][id]': 'U1432',
+        #             'players[0][trueId]': '1432',
+        #             'players[0][playerType]': 'user',
+        #             'players[0][bookedBy]': 'U1432',
+        #             'players[0][name]': 'Ockert, Benjamin',
+        #             'players[0][gender]': 'm',
+        #             'players[0][cart_pref]': '0',
+        #             'players[0][birthday]': '2000-07-10',
+        #             'players[0][email]': 'benpiano710@gmail.com',
+        #             'players[0][group]': 'FAMGF.DEP',
+        #             'players[0][groupId]': '29',
+        #             'players[0][isBuddy]': '0',
+        #             'players[0][phone]': '',
+        #             'players[0][imageUrl]': '',
+        #             'players[0][isRestricted]': '0',
+        #             'players[0][restrictedByGender]': '0',
+        #             'players[0][restrictedByAge]': '0',
+        #             'players[0][hasRequiredLeague]': '1',
+        #             'players[0][memberType]': 'member',
+        #             'players[0][holesToPlay]': '18',
+        #             'recaptcha': '',
+        #             'newMultiLock': ''}
+        # submitTeeTime = session.post("http://abenaquicc.mfteetimes.com/igolf/includes_front/teesheet2017/bookingInterface/api/Services/Reservation/TeeTime", data=formData, headers=formHeaders)
+        # print("............................................\n")
+        # print("REQUEST HEADERS: " + str(submitTeeTime.request.headers))
+        # print("............................................\n")
+        # print("RESPONSE HEADERS: " + str(submitTeeTime.headers))
+        # print("............................................\n")
+        # print("SERVER RESPONSE: " + str(submitTeeTime.status_code))
         # print(submitTeeTime.text)
 
 def tee_bot(u, p, d, t):
