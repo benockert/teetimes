@@ -59,7 +59,7 @@ function App() {
           />
           <DateTime
             inputProps={{ id:'date' }}
-            dateFormat='MM-DD-YYYY'
+            dateFormat='YYYY-MM-DD'
             timeFormat={false}
             closeOnSelect={true}
           />

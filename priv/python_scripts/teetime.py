@@ -2,10 +2,13 @@
 import argparse
 import requests
 import time
+import sys
 from datetime import datetime, timedelta
 
 from requests import Session
 
+UNAVAIL_MSG = "Sorry, Another member is currently "
+LARGE_GRP_MSG = "If you are booking a large group "
 
 class NoRebuildAuthSession(Session):
     def rebuild_auth(self, prepared_request, response):
@@ -20,45 +23,123 @@ class TeeTime(object):
     def __init__(self, username, password, date, tee_time):
         self.username = username
         self.password = password
-        self.month = date[0:2]
-        self.day = date[3:5]
-        self.year = date[6:10]
+        self.date = date
         self.tee_time = tee_time
 
-    def is_tee_sheet_closed(self):
-        right_now = datetime.now()
+        self.month = date[5:7]
+        self.day = date[8:10]
+        self.year = date[0:4]
+
+    def tee_sheet_open(self):
+        # current date and time, EST (-4 from UTC)
+        right_now = datetime.now() - timedelta(hours=4)
+
+        # requested teetime date, current time
+        requested_date = datetime(int(self.year), int(self.month), int(self.day),
+                                  right_now.hour, right_now.minute,
+                                  right_now.second, right_now.microsecond)
+
+        # day tee sheet opens, current time
         five_days_from_now = (right_now + timedelta(days=5))
 
-        print(five_days_from_now)
+        return requested_date < five_days_from_now
 
-        requested_date_current_time = datetime(int(self.year), int(self.month), int(self.day), int(right_now.hour), int(right_now.minute), int(right_now.second))
-        when_tee_sheet_opens = datetime(five_days_from_now.year, five_days_from_now.month, five_days_from_now.day, 23, 59, 59)
-
-        print("request date current time = ", requested_date_current_time)
-        print("tee sheet opens = ", when_tee_sheet_opens)
-
-        return requested_date_current_time < when_tee_sheet_opens
 
     def get_date(self):
         tee_time_date = str(self.year) + "-" + str(self.month) + "-" + str(self.day)
         return tee_time_date
 
-    def make_tee_time(self):
-        session = NoRebuildAuthSession()
-
+    def login(self, session):
         # get login page
         session.get("https://www.abenaquicc.com/club/scripts/login/login.asp")
 
-        # login
-        print("LOGGING IN USER " + self.username + " ...")
+        # post login data
         loginresponse = session.post("https://www.abenaquicc.com/club/scripts/login/Login_Validate.asp?GRP=36600&NS=PUBLIC", data={'user': self.username, 'pw': self.password, 'MemEnter': ''})
 
-        # get tee sheet
-        print("GETTING THE TEE SHEET FOR " + self.get_date() + "...")
-        teesheetresponse = session.get("http://abenaquicc.mfteetimes.com/sso/?u=01457D&p=b3a4e9474edc367129b1eaf6d8bd9b4f25eecef6&date=" + self.get_date() + "&time=&t=MEMBERNUM&course=1")
+        # TODO improve so check if redirect goes back to login page or to member-home
+        if loginresponse.status_code == 200:
+            print("Logged in successfully")
+            return session
+
+    def get_tee_sheet(self, session):
+        # TODO this query needs username and password hash (Ben's is currently hardcoded)
+        # Get today's tee sheet (no date in query parameters)
+        teesheetresponse = session.get("http://abenaquicc.mfteetimes.com/sso/?u=01457D&p=b3a4e9474edc367129b1eaf6d8bd9b4f25eecef6&date=&time=&t=MEMBERNUM&course=1")
+        resp1_status = teesheetresponse.status_code
+
+        # Gets the tee sheet for the requested date in order to call the changeDate function
+        teesheetresponse = session.get("http://abenaquicc.mfteetimes.com/teetimes.php?cmd=teesheet2017&action=display2017&jDate=" + self.date + "&course=1")
+        resp2_status = teesheetresponse.status_code
+
+        if resp1_status == 200 and resp2_status == 200:
+            print("Got tee sheet for requested date")
+            return session
+
+    def request_tee_time(self, session):
+        requestData = {'cmd': 'teesheet2017',
+                       'action': 'teetime_interface_holes_to_play',
+                       'slotsAvailable': '4',
+                       'maxSlotsAvailable': '4',
+                       'course': '1',
+                       'dateof': self.date,
+                       'time': self.tee_time,
+                       'year': str(self.year),
+                       'month': str(self.month),
+                       'day': str(self.day),
+                       'hole': '1',
+                       'block_id': '0',
+                       'blockSpecialStartAltText': '',
+                       'extraTimesVal': ''}
+
+        requesttimeresponse = session.post("http://abenaquicc.mfteetimes.com/teetimes.php?cmd=teesheet2017&action=display2017&jDate=" + self.date + "&course=1", data=requestData)
+
+        #TODO maybe get content instead of text and check for the errModal id instead
+        if requesttimeresponse.status_code == 200 and UNAVAIL_MSG not in requesttimeresponse.text:
+            if LARGE_GRP_MSG in requesttimeresponse.text:
+                print("Large group message, continuing to booking submit page")
+                # continue through booking
+                continueData = {'time': self.tee_time,
+                                'course': '1',
+                                'dateof': self.date,
+                                'blockId': '0',
+                                'hole': '1',
+                                'holesToPlay': '18',
+                                'isLottery': '0',
+                                'cmd': 'teesheet2017',
+                                'action': 'teetime_interface_select_players',
+                                'year': str(self.year),
+                                'month': str(self.month),
+                                'day': str(self.day),
+                                'time': self.tee_time,
+                                'hole': '1',
+                                'booked_ids': '[@booked_ids]',
+                                'course': '1',
+                                'block_id': '0'}
+                continuetosubmit = session.post("http://abenaquicc.mfteetimes.com/teetimes.php", data=continueData)
+                if continuetosubmit.status_code == 200:
+                    print("Successfully requested tee time")
+                    return session
+            else:
+                print("Successfully requested tee time")
+                return session
+
+    def make_tee_time(self):
+        session = NoRebuildAuthSession()
+
+        print("LOGGING IN USER " + self.username + "...")
+        session = self.login(session)
+        if not session:
+            print("Error logging in")
+            return "Error logging in"
+
+        print("GETTING THE TEE SHEET FOR " + self.date + "...")
+        session = self.get_tee_sheet(session)
+        if not session:
+            print("Error getting tee sheet")
+            return "Error getting tee sheet"
 
         # wait for tee sheet to become open
-        if self.is_tee_sheet_closed():
+        if not self.tee_sheet_open():
             print("WAITING FOR THE TEE SHEET TO OPEN...")
             while True:
                 getServerTime = session.get("http://abenaquicc.mfteetimes.com/igolf/includes_admin/ajax/misc/getServerTime")
@@ -72,47 +153,14 @@ class TeeTime(object):
         print("TEE SHEET IS OPEN")
         time.sleep(1)
 
-        # request the time
-        print("REQUESTING TEE TIME OF " + self.tee_time + " on " + self.get_date() + "...")
-        requestData = {'cmd': 'teesheet2017',
-                       'action': 'teetime_interface_holes_to_play',
-                       'slotsAvailable': '4',
-                       'maxSlotsAvailable': '4',
-                       'course': '1',
-                       'dateof': self.get_date(),
-                       'time': self.tee_time,
-                       'year': str(self.year),
-                       'month': str(self.month),
-                       'day': str(self.day),
-                       'hole': '1',
-                       'block_id': '0',
-                       'blockSpecialStartAltText': '',
-                       'extraTimesVal': ''}
-        requesttime = session.post("http://abenaquicc.mfteetimes.com/teetimes.php?cmd=teesheet2017&action=display2017&jDate=2020-10-03&course=1", data=requestData)
-
-        # continue through booking
-        continueData = {'time': self.tee_time,
-                        'course': '1',
-                        'dateof': self.get_date(),
-                        'blockId': '0',
-                        'hole': '1',
-                        'holesToPlay': '18',
-                        'isLottery': '0',
-                        'cmd': 'teesheet2017',
-                        'action': 'teetime_interface_select_players',
-                        'year': str(self.year),
-                        'month': str(self.month),
-                        'day': str(self.day),
-                        'time': self.tee_time,
-                        'hole': '1',
-                        'booked_ids': '[@booked_ids]',
-                        'course': '1',
-                        'block_id': '0'}
-        continuetosubmit = session.post("http://abenaquicc.mfteetimes.com/teetimes.php", data=continueData)
-        return continuetosubmit.status_code
+        print("REQUESTING TEE TIME OF " + self.tee_time + " on " + self.date + "...")
+        session = self.request_tee_time(session)
+        if not session:
+            print("Error requesting tee time, another member may already be requesting that time")
+            return "Error requesting tee time, another member may already be requesting that time"
 
         # submit booking
-        formData = {'dateof:': self.get_date(),
+        formData = {'dateof:': self.date,
                     'timeof': self.tee_time,
                     'timeofOriginal': self.tee_time,
                     'year': str(self.year),
