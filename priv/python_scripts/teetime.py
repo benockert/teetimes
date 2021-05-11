@@ -93,8 +93,9 @@ class TeeTime(object):
 
         requesttimeresponse = session.post("http://abenaquicc.mfteetimes.com/teetimes.php?cmd=teesheet2017&action=display2017&jDate=" + self.date + "&course=1", data=requestData)
 
+        resp_code = requesttimeresponse.status_code
         #TODO maybe get content instead of text and check for the errModal id instead
-        if requesttimeresponse.status_code == 200 and UNAVAIL_MSG not in requesttimeresponse.text:
+        if resp_code == 200 and UNAVAIL_MSG not in requesttimeresponse.text:
             if LARGE_GRP_MSG in requesttimeresponse.text:
                 print("Large group message, continuing to booking submit page")
                 # continue through booking
@@ -118,10 +119,10 @@ class TeeTime(object):
                 continuetosubmit = session.post("http://abenaquicc.mfteetimes.com/teetimes.php", data=continueData)
                 if continuetosubmit.status_code == 200:
                     print("Successfully requested tee time")
-                    return session
+                    return session, resp_code
             else:
                 print("Successfully requested tee time")
-                return session
+                return session, resp_code
 
     def make_tee_time(self):
         session = NoRebuildAuthSession()
@@ -154,10 +155,13 @@ class TeeTime(object):
         time.sleep(1)
 
         print("REQUESTING TEE TIME OF " + self.tee_time + " on " + self.date + "...")
-        session = self.request_tee_time(session)
+        session, code = self.request_tee_time(session)
         if not session:
             print("Error requesting tee time, another member may already be requesting that time")
             return "Error requesting tee time, another member may already be requesting that time"
+        else:
+            # DONE
+            return code
 
         # print("\n\n\n\n\nSUBMITTING BOOKING")
         # # submit booking
