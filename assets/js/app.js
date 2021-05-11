@@ -62,6 +62,7 @@ function App() {
             dateFormat='MM-DD-YYYY'
             timeFormat={false}
             closeOnSelect={true}
+            maxDate={new Date(new Date().getTime()+(5*86400000))}
           />
           <DateTime
             inputProps={{ id:'time' }}
