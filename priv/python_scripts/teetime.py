@@ -93,6 +93,14 @@ class TeeTime(object):
 
         requesttimeresponse = session.post("http://abenaquicc.mfteetimes.com/teetimes.php?cmd=teesheet2017&action=display2017&jDate=" + self.date + "&course=1", data=requestData)
 
+        # For getting the lock id of this teetime
+        content = requesttimeresponse.content
+        decoded = content.decode("utf-8")
+        lock_index = decoded.find("removeLock=")
+        lock_id = decoded[lock_index + 11:lock_index + 17]
+
+        print(int(lock_id))
+
         resp_code = requesttimeresponse.status_code
         #TODO maybe get content instead of text and check for the errModal id instead
         if resp_code == 200 and UNAVAIL_MSG not in requesttimeresponse.text:
@@ -119,10 +127,11 @@ class TeeTime(object):
                 continuetosubmit = session.post("http://abenaquicc.mfteetimes.com/teetimes.php", data=continueData)
                 if continuetosubmit.status_code == 200:
                     print("Successfully requested tee time")
-                    return session, resp_code
+                    return resp_code, lock_id, session
             else:
                 print("Successfully requested tee time")
-                return session, resp_code
+                print(requesttimeresponse)
+                return resp_code, lock_id, session
 
     def make_tee_time(self):
         session = NoRebuildAuthSession()
@@ -155,13 +164,13 @@ class TeeTime(object):
         time.sleep(1)
 
         print("REQUESTING TEE TIME OF " + self.tee_time + " on " + self.date + "...")
-        session, code = self.request_tee_time(session)
+        code, lock_id, session = self.request_tee_time(session)
         if not session:
             print("Error requesting tee time, another member may already be requesting that time")
             return "Error requesting tee time, another member may already be requesting that time"
         else:
             # DONE
-            return code
+            return int(lock_id)
 
         # print("\n\n\n\n\nSUBMITTING BOOKING")
         # # submit booking

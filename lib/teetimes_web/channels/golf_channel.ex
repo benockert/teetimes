@@ -19,4 +19,15 @@ defmodule TeetimesWeb.GolfChannel do
     {:reply, {:ok, %{response: resp }}, socket}
   end
 
+  @impl true
+  def handle_in("unblock", %{"username" => uname,
+                "password" => pass, "date" => date,
+                "time" => time, "block_id" => id}, socket) do
+    IO.inspect("Block ID")
+    IO.inspect(id)
+    resp = PythonServer.call_function(:removelock, :remove_lock, [uname, pass, date, time, id])
+
+    {:reply, {:ok, %{response: resp }}, socket}
+  end
+
 end

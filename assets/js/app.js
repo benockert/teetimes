@@ -13,12 +13,19 @@ import ReactDOM from 'react-dom';
 import { get_channel } from "./socket.js";
 
 function App() {
+  //form inputs
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
 
+  //alerts
   const [msg, setMsg] = useState("");
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  //block
+  const [block, setBlockId] = useState("");
 
   function reserve(u, p) {
     let d = $('#date').val();
@@ -32,15 +39,50 @@ function App() {
 
     let channel = get_channel();
     channel.push("reserve", {username: u, password: p, date: d, time: t})
-           .receive("ok", (response) => console.log("Received from server:", response));
+           .receive("ok", (response) => {
+             console.log("Received from server:", response.response);
+             if (response.response.length > 20) {
+               setError(response.response);
+             } else {
+               setSuccess("Successfully reserved tee time. You can now choose when to remove the hold on your tee time.");
+               setBlockId(response.response);
+             }
+           });
+  }
+
+  function remove_block(u, p, b) {
+    let d = $('#date').val();
+    let t = $('#time').val();
+    console.log("Removing block " + b);
+    let send = "Removing lock " + b + " for tee time " + t + "on" + d + ".";
+    setMsg(send);
+
+    let channel = get_channel();
+    channel.push("unblock", {username: u, password: p, date: d, time: t, block_id: b})
+           .receive("ok", (response) => {
+             console.log("Received from server:", response);
+             setSuccess("Successfully removed the lock on your tee time. You can now go in and manually reserve it.");
+           });
   }
 
   return (
     <div>
       {msg !== "" &&
-        <div className="alert">
+        <div className="alert alert-info">
           <span className="closebtn" onClick={() => setMsg("")}>&times;</span>
           {msg}
+        </div>
+      }
+      {success !== "" &&
+        <div className="alert">
+          <span className="closebtn" onClick={() => setSuccess("")}>&times;</span>
+          {success}
+        </div>
+      }
+      {error !== "" &&
+        <div className="alert alert-danger">
+          <span className="closebtn" onClick={() => setError("")}>&times;</span>
+          {error}
         </div>
       }
       <div id="form">
@@ -62,16 +104,22 @@ function App() {
             dateFormat='YYYY-MM-DD'
             timeFormat={false}
             closeOnSelect={true}
-            maxDate={new Date(new Date().getTime()+(5*86400000))}
           />
           <DateTime
             inputProps={{ id:'time' }}
             dateFormat={false}
             timeFormat='HH:mm:00'
           />
-          <button className="button" onClick={() => reserve(username, password)}>
-            Reserve
-          </button>
+          {block == "" &&
+            <button className="reserve-btn button" onClick={() => reserve(username, password)}>
+              Reserve
+            </button>
+          }
+          {block !== "" &&
+            <button id="remove-lock-btn" className="button remove-lock" onClick={() => remove_block(username, password, block)}>
+              Remove Lock
+            </button>
+          }
         </div>
       </div>
     </div>
@@ -124,6 +172,15 @@ $(document).ready(function() {
     if(!$(this).val()) {
       $(this).attr("placeholder", "Select your target time (HH:mm:00)");
     }
+  });
+});
+
+$(document).ready(function() {
+  $('.reserve-btn').click(function(e) {
+    e.preventDefault();
+    $('#form').find("input").each(function() {
+      $(this).attr("disabled", true);
+    });
   });
 });
 

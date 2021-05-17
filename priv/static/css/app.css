@@ -119,6 +119,15 @@ header nav a {
   bottom: 1%;
   left: 1%; }
 
+.remove-lock {
+  background-color: #b52121 !important;
+  border-color: #b52121 !important; }
+
+.remove-lock:hover {
+  background-color: #b52121 !important;
+  border-color: #b52121 !important;
+  box-shadow: 0 0 15px #b52121 !important; }
+
 .button {
   background-color: #e6a44f;
   outline: none !important;
